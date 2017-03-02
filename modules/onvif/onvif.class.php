@@ -172,15 +172,30 @@ function run() {
      } else {
          $onvif_object->setPassword('');
      }
+
      if ($rec['XADDRS']) {
          $onvif_object->setMediaUri($rec['XADDRS']);
      } else {
          $onvif_object->setMediaUri('');
      }
+
+     if (!$rec['ENDPOINT_ADDRESS'] && !$rec['TYPES'] && !$rec['XADDRS']) {
+         //new device
+         //$response=$onvif_object->core_GetDeviceInformation();
+         //$response=$onvif_object->core_GetCapabilities();
+         //var_dump($response);exit;
+     }
+
+
     $initialized=$onvif_object->initialize();
+     if (!$rec['ENDPOINT_ADDRESS'] && !$rec['TYPES'] && !$rec['XADDRS']) {
+         //var_dump($onvif_object);exit;
+     }
+
     if ($initialized) {
 
         if (!$quick) {
+
             $sources = $onvif_object->getSources();
             $streams = array();
             $total = count($sources[0]);

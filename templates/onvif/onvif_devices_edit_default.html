@@ -86,16 +86,22 @@
     [#begin STREAMS#]
      [#TITLE#] [<a href="#" onclick="$('#stream[#ID#]').toggle();return false;"><#LANG_DATA#></a>]
    <div id="stream[#ID#]" style="display:none">
-   [#module name="thumb" url="<#STREAMS.URL#>"#]<br/>&nbsp;
+   [#if "<#USERNAME#>"!=""#]
+   [#module name="thumb" url="<#STREAMS.URL#>" username="<#USERNAME#>" password="<#PASSWORD#>"#]
+   [#else#]
+   [#module name="thumb" url="<#STREAMS.URL#>"#]
+   [#endif#]
+   <br/>&nbsp;
 <pre>
 Stream URL:
 [#URL#]
 
 Snapshot code:
-&#091#module name="thumb" url="<#STREAMS.URL#>"#&#093
+[#if "<#USERNAME#>"==""#]&#091#module name="thumb" url="<#STREAMS.URL#>"#&#093[#else#]&#091#module name="thumb" url="<#STREAMS.URL#>" username="<#USERNAME#>" password="<#PASSWORD#>"#&#093[#endif#]
 
 Video code:
-&#091#module name="thumb" url="<#STREAMS.URL#>" live="1"#&#093</pre>
+[#if "<#USERNAME#>"==""#]&#091#module name="thumb" url="<#STREAMS.URL#>" live="1"#&#093[#else#]&#091#module name="thumb" url="<#STREAMS.URL#>" live="1" username="<#USERNAME#>" password="<#PASSWORD#>"#&#093[#endif#]
+</pre>
    </div>
    <hr/>
     [#end STREAMS#]

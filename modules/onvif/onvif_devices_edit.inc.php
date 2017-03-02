@@ -131,7 +131,9 @@
    $out['XADDRS']=implode('<br/>', $tmp);
   }
 
-  $streams=SQLSelect("SELECT * FROM onvif_streams WHERE DEVICE_ID=".$rec['ID']." ORDER BY TITLE");
-  if ($streams[0]['ID']) {
-   $out['STREAMS']=$streams;
+  if ($rec['ID']) {
+   $streams=SQLSelect("SELECT * FROM onvif_streams WHERE DEVICE_ID=".$rec['ID']." ORDER BY TITLE");
+   if ($streams[0]['ID']) {
+    $out['STREAMS']=$streams;
+   }
   }

@@ -351,7 +351,10 @@ class Ponvif {
                                $REQ['TIMESTAMP']),
                          $post_string);
                 if ($this->isFault($response=$this->_send_request($this->mediauri,$post_string))) {
-                        if ($this->intransingent) throw new Exception('GetDeviceInformation: Communication error');
+                        if ($this->intransingent) {
+                                //throw new Exception('GetDeviceInformation: Communication error');
+                                return false;
+                        }
                 }
                 else
                         return $response['Envelope']['Body']['GetDeviceInformationResponse'];
@@ -791,11 +794,13 @@ class Ponvif {
                 } else {
                         $this->lastresponse=$this->_xml2array($result);
                 }
+
                 /*
                 echo $url."<br/><br/>";
                 echo htmlspecialchars($post_string)."<br/><br/>";
                 echo htmlspecialchars($result)."<hr>";
                 */
+
                 return $this->lastresponse;
         }
 } // end class
