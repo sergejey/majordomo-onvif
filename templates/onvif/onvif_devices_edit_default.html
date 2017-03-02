@@ -1,0 +1,149 @@
+
+<!-- Table 'onvif_devices' edit -->
+<form action="?" method="post" enctype="multipart/form-data" name="frmEdit" class="form-horizontal">
+[#if OK#]
+<div class="alert alert-success"><#LANG_DATA_SAVED#></div>
+[#endif OK#]
+[#if ERR#]
+<div class="alert alert-error"><#LANG_FILLOUT_REQURED#></div>
+[#endif ERR#]
+<fieldset>
+[#if ID=""#]
+<legend><#LANG_NEW_RECORD#></legend>
+[#endif ID#]
+<!-- TITLE (varchar) -->
+<div class="form-group">
+ <label class="col-lg-3 control-label"[#if ERR_TITLE#] style="color:red;font-weight:bold"[#endif#]>
+ <#LANG_TITLE#>:
+ (*)
+ </label>
+ <div class="col-lg-8"><input type="text" class="form-control" name="title" value="[#TITLE#]" id="title"></div>
+</div>
+
+ <div class="form-group">
+  <label class="col-lg-3 control-label">
+   Enable ONVIF events polling:
+  </label>
+  <div class="col-lg-8">
+   <input type="radio" name="subscribe" value="1"[#if SUBSCRIBE="1"#] checked[#endif#]> <#LANG_YES#>
+   <input type="radio" name="subscribe" value="0"[#if SUBSCRIBE!="1"#] checked[#endif#]> <#LANG_NO#>
+  </div>
+ </div>
+
+ <div class="form-group">
+  <label class="col-lg-3 control-label">
+   Polling period (seconds):
+  </label>
+  <div class="col-lg-8">
+   <input type="text" class="form-control" name="subscription_timeout" value="[#SUBSCRIPTION_TIMEOUT#]" id="title">
+  </div>
+ </div>
+
+<div class="form-group">
+ <label class="col-lg-3 control-label">
+ EndpointReference Address:
+ </label>
+ <div class="col-lg-8">[#ENDPOINT_ADDRESS#]</div>
+</div>
+<div class="form-group">
+ <label class="col-lg-3 control-label">
+ Types:
+ </label>
+ <div class="col-lg-8">[#TYPES#]</div>
+</div>
+
+<div class="form-group">
+ <label class="col-lg-3 control-label">
+ Scopes:
+ </label>
+ <div class="col-lg-8">[#SCOPES#]</div>
+</div>
+
+<div class="form-group">
+ <label class="col-lg-3 control-label">
+ XAddrs:
+ </label>
+ <div class="col-lg-8">[#XADDRS#]</div>
+</div>
+
+ [#if SUBSCRIPTION_ADDRESS!=""#]
+ <div class="form-group">
+  <label class="col-lg-3 control-label">
+   Subscription address:
+  </label>
+  <div class="col-lg-8">[#SUBSCRIPTION_ADDRESS#]</div>
+ </div>
+ [#endif#]
+
+
+
+ [#if STREAMS#]
+ <div class="form-group">
+  <label class="col-lg-3 control-label">
+   Streams:
+  </label>
+  <div class="col-lg-8">
+    [#begin STREAMS#]
+     [#TITLE#] [<a href="#" onclick="$('#stream[#ID#]').toggle();return false;"><#LANG_DATA#></a>]
+   <div id="stream[#ID#]" style="display:none">
+   [#module name="thumb" url="<#STREAMS.URL#>"#]<br/>&nbsp;
+<pre>
+Stream URL:
+[#URL#]
+
+Snapshot code:
+&#091#module name="thumb" url="<#STREAMS.URL#>"#&#093
+
+Video code:
+&#091#module name="thumb" url="<#STREAMS.URL#>" live="1"#&#093</pre>
+   </div>
+   <hr/>
+    [#end STREAMS#]
+  </div>
+ </div>
+ [#endif STREAMS#]
+
+<!-- IP (varchar) -->
+<div class="form-group">
+ <label class="col-lg-3 control-label"[#if ERR_IP#] style="color:red;font-weight:bold"[#endif#]>
+ IP:
+ </label>
+ <div class="col-lg-8"><input type="text" class="form-control" name="ip" value="[#IP#]" id="ip"></div>
+</div>
+<!-- USERNAME (varchar) -->
+<div class="form-group">
+ <label class="col-lg-3 control-label"[#if ERR_USERNAME#] style="color:red;font-weight:bold"[#endif#]>
+ USERNAME:
+ </label>
+ <div class="col-lg-8"><input type="text" class="form-control" name="username" value="[#USERNAME#]" id="username"></div>
+</div>
+<!-- PASSWORD (varchar) -->
+<div class="form-group">
+ <label class="col-lg-3 control-label"[#if ERR_PASSWORD#] style="color:red;font-weight:bold"[#endif#]>
+  PASSWORD:
+ </label>
+ <div class="col-lg-8"><input type="text" class="form-control" name="password" value="[#PASSWORD#]" id="password"></div>
+</div>
+
+<div class="form-group">
+        <div class="col-lg-offset-3 col-lg-8">
+ [#if ID!=""#]
+ <button type="submit" name="subm" value="Submit" class="btn btn-primary"><#LANG_SUBMIT#></button>
+ [#else ID#]
+ <button type="submit" name="subm" value="Add" class="btn btn-primary"><#LANG_ADD#></button>
+ [#endif ID#]
+ <a href="?data_source=<#DATA_SOURCE#>" class="btn btn-default "><#LANG_CANCEL#></a>
+ <!--#
+ <a href="?data_source=<#DATA_SOURCE#>&view_mode=<#VIEW_MODE#>&mode=refresh&id=[#ID#]" class="btn btn-default "><#LANG_REFRESH#></a>
+ #-->
+
+<input type="hidden" name="id" value="<#ID#>">
+<input type="hidden" name="view_mode" value="<#VIEW_MODE#>">
+<input type="hidden" name="edit_mode" value="<#EDIT_MODE#>">
+<input type="hidden" name="mode" value="update">
+<input type="hidden" name="data_source" value="<#DATA_SOURCE#>">
+<input type="hidden" name="tab" value="<#TAB#>">
+        </div>
+</div>
+</fieldset>
+</form>

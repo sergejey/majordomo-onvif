@@ -1,0 +1,56 @@
+
+ <!-- action usual -->
+ [#if DATA_SOURCE="onvif_devices" || DATA_SOURCE=""#]
+ <!-- table onvif_devices search -->
+ [#if VIEW_MODE="search_onvif_devices" || VIEW_MODE=""#]
+  [#inc onvif_devices_search_admin.html#]
+ [#endif VIEW_MODE#]
+ <!-- / table onvif_devices search -->
+ <!-- table onvif_devices edit -->
+ [#if VIEW_MODE="edit_onvif_devices"#]
+   [#if ID!=""#]
+   [#if TITLE!=""#]<h4>[#TITLE#]</h4>[#endif TITLE#]
+<ul class="nav nav-tabs">
+  <li[#if TAB=""#] class="active"[#endif#]>
+   <a href="?data_source=<#DATA_SOURCE#>&view_mode=<#VIEW_MODE#>&id=<#ID#>&tab="><#LANG_GENERAL#></a>
+  </li>
+  <li[#if TAB="data"#] class="active"[#endif#]>
+   <a href="?data_source=<#DATA_SOURCE#>&view_mode=<#VIEW_MODE#>&id=<#ID#>&tab=data">&#060#LANG_DATA#&#062</a>
+  </li>
+</ul>
+&nbsp;<br/>
+   [#endif ID#]
+   [#if TAB=""#]
+    [#inc onvif_devices_edit_default.html#]
+   [#endif TAB#]
+   [#if TAB="data"#]
+    [#inc onvif_devices_edit_data.html#]
+   [#endif TAB#]
+ [#endif VIEW_MODE#]
+ <!-- / table onvif_devices edit -->
+ <!-- table onvif_devices view --> 
+ [#if VIEW_MODE="view_onvif_devices"#]
+   [#if TAB=""#]
+    [#inc onvif_devices_view_default.html#]
+   [#endif TAB#]
+ [#endif VIEW_MODE#]
+ <!-- / table onvif_devices view -->
+ [#endif DATA_SOURCE#]
+ <!-- action usual -->
+ [#if DATA_SOURCE="onvif_commands"#]
+ <!-- table onvif_commands search -->
+ [#if VIEW_MODE="search_onvif_commands" || VIEW_MODE=""#]
+  [#inc onvif_commands_search_admin.html#]
+ [#endif VIEW_MODE#]
+ <!-- / table onvif_commands search -->
+ <!-- table onvif_commands edit -->
+ [#if VIEW_MODE="edit_onvif_commands"#]
+   [#inc onvif_commands_edit.html#]
+ [#endif VIEW_MODE#]
+ <!-- / table onvif_commands edit -->
+ <!-- table onvif_commands view --> 
+ [#if VIEW_MODE="view_onvif_commands"#]
+   [#inc onvif_commands_view.html#]
+ [#endif VIEW_MODE#]
+ <!-- / table onvif_commands view -->
+ [#endif DATA_SOURCE#]
