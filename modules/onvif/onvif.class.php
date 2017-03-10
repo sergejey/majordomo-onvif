@@ -202,6 +202,9 @@ function run() {
             $seen = array();
             for ($i = 0; $i < $total; $i++) {
                 $profileToken = $sources[0][$i]['profiletoken'];
+                if (!$profileToken) {
+                 continue;
+                }
                 $mediaUri = $onvif_object->media_GetStreamUri($profileToken);
                 if (!$seen[$mediaUri]) {
                     $seen[$mediaUri] = 1;
@@ -507,7 +510,7 @@ function usual(&$out) {
 *
 * @access private
 */
- function dbInstall() {
+ function dbInstall($data='') {
 /*
 onvif_devices - 
 onvif_commands - 
@@ -519,9 +522,9 @@ onvif_commands -
  onvif_devices: USERNAME varchar(255) NOT NULL DEFAULT ''
  onvif_devices: PASSWORD varchar(255) NOT NULL DEFAULT ''
  onvif_devices: ENDPOINT_ADDRESS varchar(255) NOT NULL DEFAULT ''
- onvif_devices: TYPES varchar(255) NOT NULL DEFAULT ''
- onvif_devices: SCOPES varchar(255) NOT NULL DEFAULT ''
- onvif_devices: XADDRS varchar(255) NOT NULL DEFAULT ''
+ onvif_devices: TYPES text
+ onvif_devices: SCOPES text
+ onvif_devices: XADDRS text
  onvif_devices: SUBSCRIBE int(3) unsigned NOT NULL DEFAULT '0' 
  onvif_devices: SUBSCRIPTION_ADDRESS varchar(255) NOT NULL DEFAULT ''
  onvif_devices: SUBSCRIPTION_TIMEOUT int(10) unsigned NOT NULL DEFAULT '0' 
