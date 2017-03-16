@@ -449,11 +449,7 @@ function usual(&$out) {
                  $response=$this->onvif_devices[$devices[$i]['ID']]->onvif->events_Pull($devices[$i]['SUBSCRIPTION_ADDRESS']);
                  if (is_array($response)) {
                      $url=BASE_URL.'/ajax/onvif.html';
-                     $post = [
-                         'id' => $devices[$i]['ID'],
-                         'op' => 'event',
-                         'response'   => json_encode($response),
-                     ];
+                     $post = array('id' => $devices[$i]['ID'],'op' => 'event','response'   => json_encode($response));
                      $ch = curl_init();
                      curl_setopt($ch, CURLOPT_URL, $url);
                      curl_setopt($ch, CURLOPT_POST, 1);
