@@ -86,8 +86,8 @@
       $properties[$i]['TITLE']=trim(${'title'.$properties[$i]['ID']});
       global ${'value'.$properties[$i]['ID']};
       $properties[$i]['VALUE']=trim(${'value'.$properties[$i]['ID']});
-      global ${'linked_object'.$properties[$i]['ID']};
       */
+      global ${'linked_object'.$properties[$i]['ID']};
       $properties[$i]['LINKED_OBJECT']=trim(${'linked_object'.$properties[$i]['ID']});
       global ${'linked_property'.$properties[$i]['ID']};
       $properties[$i]['LINKED_PROPERTY']=trim(${'linked_property'.$properties[$i]['ID']});
