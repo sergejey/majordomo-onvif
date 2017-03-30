@@ -45,6 +45,12 @@
       global $subscription_timeout;
       $rec['SUBSCRIPTION_TIMEOUT']=(int)$subscription_timeout;
 
+
+      if (!$rec['ID']) {
+          global $xaddrs;
+          $rec['XADDRS']=$xaddrs;
+      }
+
   }
   // step: data
   if ($this->tab=='data') {

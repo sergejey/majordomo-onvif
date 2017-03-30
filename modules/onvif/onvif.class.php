@@ -138,7 +138,7 @@ function run() {
     if (!$result[$i]['IPAddr']) {
      continue;
     }
-    $rec=SQLSelectOne("SELECT * FROM onvif_devices WHERE IP LIKE '".DBSafe($result[$i]['IPAddr'])."'");
+    $rec=SQLSelectOne("SELECT * FROM onvif_devices WHERE (IP LIKE '".DBSafe($result[$i]['IPAddr'])."' OR XADDRS LIKE '".DBSafe($result[$i]['XAddrs'])."')");
     $rec['ENDPOINT_ADDRESS']=trim($result[$i]['EndpointReference']['Address']);
     $rec['IP']=$result[$i]['IPAddr'];
     $rec['TYPES']=$result[$i]['Types'];

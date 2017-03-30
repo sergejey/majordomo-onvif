@@ -20,6 +20,7 @@
  <div class="col-lg-8"><input type="text" class="form-control" name="title" value="[#TITLE#]" id="title"></div>
 </div>
 
+ [#if ID!=""#]
  <div class="form-group">
   <label class="col-lg-3 control-label">
    Enable ONVIF events polling:
@@ -116,17 +117,27 @@ Video code:
  </label>
  <div class="col-lg-8"><input type="text" class="form-control" name="ip" value="[#IP#]" id="ip"></div>
 </div>
+
+[#else ID#]
+ <div class="form-group">
+  <label class="col-lg-3 control-label">
+   End-point address:
+  </label>
+  <div class="col-lg-8"><input type="text" class="form-control" name="xaddrs" value="[#if XADDRS=""#]http://192.168.0.1/onvif/device_service[#else#][#XADDRS#][#endif#]" id="xaddrs"></div>
+ </div>
+[#endif ID#]
+
 <!-- USERNAME (varchar) -->
 <div class="form-group">
  <label class="col-lg-3 control-label"[#if ERR_USERNAME#] style="color:red;font-weight:bold"[#endif#]>
- USERNAME:
+ <#LANG_USERNAME#>:
  </label>
  <div class="col-lg-8"><input type="text" class="form-control" name="username" value="[#USERNAME#]" id="username"></div>
 </div>
 <!-- PASSWORD (varchar) -->
 <div class="form-group">
  <label class="col-lg-3 control-label"[#if ERR_PASSWORD#] style="color:red;font-weight:bold"[#endif#]>
-  PASSWORD:
+  <#LANG_PASSWORD#>:
  </label>
  <div class="col-lg-8"><input type="text" class="form-control" name="password" value="[#PASSWORD#]" id="password"></div>
 </div>
