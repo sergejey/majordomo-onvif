@@ -25,6 +25,18 @@
    $total=count($res);
    for($i=0;$i<$total;$i++) {
     // some action for every record if required
-   }
+    ////directman66
+$ip=$res[$i]['IP'];
+$lastping=$mhdevices[$i]['LASTPING'];
+//echo time()-$lastping;
+if (time()-$lastping>300) {
+$online=ping(processTitle($ip));
+    if ($online) 
+{SQLexec("update onvif_devices set ONLINE='1', LASTPING=".time()." where IP='$ip'");} 
+else 
+{SQLexec("update onvif_devices set ONLINE='0', LASTPING=".time()." where IP='$ip'");}
+}
+////
+ }
    $out['RESULT']=$res;
   }
