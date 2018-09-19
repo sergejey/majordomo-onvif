@@ -525,6 +525,8 @@ onvif_commands -
  onvif_devices: SUBSCRIPTION_ADDRESS varchar(255) NOT NULL DEFAULT ''
  onvif_devices: SUBSCRIPTION_TIMEOUT int(10) unsigned NOT NULL DEFAULT '0' 
  onvif_devices: LATEST_POLL datetime  
+ onvif_devices: ONLINE int(3)
+ onvif_devices: LASTPING text
 
  onvif_commands: ID int(10) unsigned NOT NULL auto_increment
  onvif_commands: TITLE varchar(100) NOT NULL DEFAULT ''
