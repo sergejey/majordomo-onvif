@@ -23,7 +23,11 @@ while (1)
    if ((time()-$latest_check)>$checkEvery) {
     $latest_check=time();
     //echo date('Y-m-d H:i:s').' Polling devices...';
-    $onvif_module->processCycle();
+      $onvif_module->processCycle();
+      /*
+      $url=BASE_URL.'/ajax/onvif.html?op=cycle';
+      getURLBackground($url);
+      */
    }
    if (file_exists('./reboot') || IsSet($_GET['onetime']))
    {

@@ -159,8 +159,22 @@ function run() {
  }
 
 
- function updateDevice($id, &$onvif_object, $quick=0) {
+ function updateDevice($id, &$onvif_object=0, $quick=0) {
+
+
+     if (!is_object($onvif_object)) {
+         include_once(DIR_MODULES.'onvif/class.ponvif.php');
+         $onvif_object=new Ponvif();
+     }
+
+
+
      $rec=SQLSelectOne("SELECT * FROM onvif_devices WHERE ID=".(int)$id);
+
+     if (!$rec['IP']) {
+         DebMes("Unknown device: $id",'onvif');
+     }
+
      $onvif_object->setIPAddress($rec['IP']);
      if ($rec['USERNAME']) {
          $onvif_object->setUsername($rec['USERNAME']);
@@ -173,11 +187,13 @@ function run() {
          $onvif_object->setPassword('');
      }
 
+     /*
      if ($rec['XADDRS']) {
          $onvif_object->setMediaUri($rec['XADDRS']);
      } else {
          $onvif_object->setMediaUri('');
      }
+     */
 
      if (!$rec['ENDPOINT_ADDRESS'] && !$rec['TYPES'] && !$rec['XADDRS']) {
          //new device
@@ -188,15 +204,18 @@ function run() {
 
 
     $initialized=$onvif_object->initialize();
+
      if (!$rec['ENDPOINT_ADDRESS'] && !$rec['TYPES'] && !$rec['XADDRS']) {
          //var_dump($onvif_object);exit;
      }
 
+
     if ($initialized) {
 
         if (!$quick) {
-
             $sources = $onvif_object->getSources();
+
+
             $streams = array();
             $total = count($sources[0]);
             $seen = array();
@@ -226,16 +245,21 @@ function run() {
 
         if ($rec['SUBSCRIBE']) {
             $response = $onvif_object->events_Subscribe();
+            //dprint($response);
+            //DebMes("Update subscription response: ".$response ,'onvif');
             if ($response['SubscriptionReference']['Address']) {
                 $rec['SUBSCRIPTION_ADDRESS']=$response['SubscriptionReference']['Address'];
                 SQLUpdate('onvif_devices',$rec);
             }
+            //dprint($onvif_object,false);
+
             /*
             if ($rec['SUBSCRIPTION_ADDRESS']) {
                 $response=$onvif_object->events_Pull($rec['SUBSCRIPTION_ADDRESS']);
                 $this->processEventResponse($rec['ID'],$response);
             }
             */
+
         }
         return 1;
     } else {
@@ -248,7 +272,7 @@ function processEventResponse($device_id,$data) {
     $rec=SQLSelectOne("SELECT * FROM onvif_devices WHERE ID=".(int)$device_id);
     if (!$rec['ID']) return;
 
-    //DebMes("Processing event response for $device_id : \n".json_encode($data));
+    //DebMes("Processing event response for $device_id : \n".json_encode($data),'onvif');
     $items=array();
 
     $item=array();
@@ -274,15 +298,15 @@ function processEventResponse($device_id,$data) {
             $command['ID']=SQLInsert('onvif_commands',$command);
         }
         $old_value=$command['VALUE'];
-        $value=$command['VALUE'];
         $command['VALUE']=$item['VALUE'];
+        $value=$command['VALUE'];
         $command['UPDATED']=date('Y-m-d H:i:s');
         SQLUpdate('onvif_commands',$command);
         if ($command['LINKED_OBJECT'] && $command['LINKED_PROPERTY']) {
-            setGlobal($cmd_rec['LINKED_OBJECT'].'.'.$cmd_rec['LINKED_PROPERTY'], $value, array($this->name=>'0'));
+            setGlobal($command['LINKED_OBJECT'].'.'.$command['LINKED_PROPERTY'], $value, array($this->name=>'0'));
         }
         if ($command['LINKED_OBJECT'] && $command['LINKED_METHOD']) {
-            callMethod($cmd_rec['LINKED_OBJECT'].'.'.$cmd_rec['LINKED_METHOD'], $item['FULL_DATA']);
+            callMethod($command['LINKED_OBJECT'].'.'.$command['LINKED_METHOD'], $item['FULL_DATA']);
         }
     }
 
@@ -352,6 +376,9 @@ function usual(&$out) {
         if ($op=='event' && $id!='' && $response!='') {
             $this->processEventResponse($id, json_decode($response,true));
         }
+        if ($op=='cycle') {
+            $this->processCycle();
+        }
         //DebMes("Onvif AJAX: ".serialize($_GET));
     }
 }
@@ -414,7 +441,7 @@ function usual(&$out) {
      include_once(DIR_MODULES.'onvif/class.ponvif.php');
      $updateTimeout=45; // subscription update timer
 
-     $devices=SQLSelect("SELECT ID, TITLE, SUBSCRIBE, SUBSCRIPTION_TIMEOUT, SUBSCRIPTION_ADDRESS FROM onvif_devices");
+     $devices=SQLSelect("SELECT * FROM onvif_devices");
      $total = count($devices);
 
      if (!is_array($this->onvif_devices)) {
@@ -428,25 +455,29 @@ function usual(&$out) {
          }
          $processed[$devices[$i]['ID']]=1;
          if (!isset($this->onvif_devices[$devices[$i]['ID']]) ) {
-             DebMes("ONVIF Device ".$devices[$i]['TITLE']." adding device to cycle.");
+             DebMes("ONVIF Device ".$devices[$i]['TITLE']." adding device to cycle.",'onvif');
              $this->onvif_devices[$devices[$i]['ID']]->updated=0;
              $this->onvif_devices[$devices[$i]['ID']]->polled=0;
              $this->onvif_devices[$devices[$i]['ID']]->onvif=new Ponvif();
          }
+
+
          if ((time()-$this->onvif_devices[$devices[$i]['ID']]->updated)>=$updateTimeout) {
-             //DebMes("ONVIF Device ".$devices[$i]['TITLE']." updating subscription");
+             DebMes("ONVIF Device ".$devices[$i]['TITLE']." updating subscription",'onvif');
              $this->onvif_devices[$devices[$i]['ID']]->updated=time();
              $this->updateDevice($devices[$i]['ID'], $this->onvif_devices[$devices[$i]['ID']]->onvif,1); // quick update
-             $devices[$i]=SQLSelectOne("SELECT ID, TITLE, SUBSCRIBE, SUBSCRIPTION_ADDRESS FROM onvif_devices");
+             $devices[$i]=SQLSelectOne("SELECT * FROM onvif_devices WHERE ID=".$devices[$i]['ID']);
          }
          if ($devices[$i]['SUBSCRIPTION_ADDRESS']!='') {
              if (!$devices[$i]['SUBSCRIPTION_TIMEOUT']) {
                  $devices[$i]['SUBSCRIPTION_TIMEOUT']=5; // default polling every 5 seconds
              }
              if ((time()-$this->onvif_devices[$devices[$i]['ID']]->polled)>=$devices[$i]['SUBSCRIPTION_TIMEOUT']) {
-                 //DebMes("ONVIF Device ".$devices[$i]['TITLE']." polling events");
+                 $subscription_address=$devices[$i]['SUBSCRIPTION_ADDRESS'];
+                 //DebMes("ONVIF Device ".$devices[$i]['TITLE']." polling events (addr: ".$subscription_address.")",'onvif');
+                 //DebMes($this->onvif_devices[$devices[$i]['ID']],'onvif');
                  $this->onvif_devices[$devices[$i]['ID']]->polled=time();
-                 $response=$this->onvif_devices[$devices[$i]['ID']]->onvif->events_Pull($devices[$i]['SUBSCRIPTION_ADDRESS']);
+                 $response=$this->onvif_devices[$devices[$i]['ID']]->onvif->events_Pull($subscription_address);
                  if (is_array($response)) {
                      $url=BASE_URL.'/ajax/onvif.html';
                      $post = array('id' => $devices[$i]['ID'],'op' => 'event','response'   => json_encode($response));
@@ -462,14 +493,14 @@ function usual(&$out) {
                      curl_close($ch);
 
                  }
-                 //DebMes("ONVIF Device ".$devices[$i]['TITLE']." events poll response:\n".json_encode($response));
+                 //DebMes("ONVIF Device ".$devices[$i]['TITLE']." events poll response:\n".json_encode($response),'onvif');
              }
          }
      }
 
      foreach($this->onvif_devices as $k=>$v) {
          if (!$processed[$k]) {
-             DebMes("ONVIF Device ".$k." removing device from cycle");
+             DebMes("ONVIF Device ".$k." removing device from cycle",'onvif');
              unset($this->onvif_devices[$k]);
          }
      }
