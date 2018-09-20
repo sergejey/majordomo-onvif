@@ -187,13 +187,13 @@ function run() {
          $onvif_object->setPassword('');
      }
 
-     /*
-     if ($rec['XADDRS']) {
-         $onvif_object->setMediaUri($rec['XADDRS']);
+     if (preg_match('/http:.+\W/uis',$rec['XADDRS'],$m)) {
+         $link = $m[0];
+         $link=preg_replace('/\[.+?\]/',$rec['IP'],$link);
+         $onvif_object->setMediaUri($link);
      } else {
          $onvif_object->setMediaUri('');
      }
-     */
 
      if (!$rec['ENDPOINT_ADDRESS'] && !$rec['TYPES'] && !$rec['XADDRS']) {
          //new device
@@ -214,11 +214,13 @@ function run() {
          //var_dump($onvif_object);exit;
      }
 
-
     if ($initialized) {
 
         if (!$quick) {
+
+
             $sources = $onvif_object->getSources();
+
 
 
             $streams = array();
@@ -460,7 +462,7 @@ function usual(&$out) {
          }
          $processed[$devices[$i]['ID']]=1;
          if (!isset($this->onvif_devices[$devices[$i]['ID']]) ) {
-             DebMes("ONVIF Device ".$devices[$i]['TITLE']." adding device to cycle.",'onvif');
+             //DebMes("ONVIF Device ".$devices[$i]['TITLE']." adding device to cycle.",'onvif');
              $this->onvif_devices[$devices[$i]['ID']]['updated']=0;
              $this->onvif_devices[$devices[$i]['ID']]['polled']=0;
              $this->onvif_devices[$devices[$i]['ID']]['onvif']=new Ponvif();
@@ -468,7 +470,7 @@ function usual(&$out) {
 
 
          if ((time()-$this->onvif_devices[$devices[$i]['ID']]['updated'])>=$updateTimeout) {
-             DebMes("ONVIF Device ".$devices[$i]['TITLE']." updating subscription",'onvif');
+             //DebMes("ONVIF Device ".$devices[$i]['TITLE']." updating subscription",'onvif');
              $this->onvif_devices[$devices[$i]['ID']]['updated']=time();
              $this->updateDevice($devices[$i]['ID'], $this->onvif_devices[$devices[$i]['ID']]['onvif'],1); // quick update
              $devices[$i]=SQLSelectOne("SELECT * FROM onvif_devices WHERE ID=".$devices[$i]['ID']);
