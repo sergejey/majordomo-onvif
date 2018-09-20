@@ -203,7 +203,12 @@ function run() {
      }
 
 
-    $initialized=$onvif_object->initialize();
+     try {
+         $initialized = $onvif_object->initialize();
+     } catch (Exception $e) {
+         $initialized = false;
+     }
+
 
      if (!$rec['ENDPOINT_ADDRESS'] && !$rec['TYPES'] && !$rec['XADDRS']) {
          //var_dump($onvif_object);exit;
@@ -456,28 +461,28 @@ function usual(&$out) {
          $processed[$devices[$i]['ID']]=1;
          if (!isset($this->onvif_devices[$devices[$i]['ID']]) ) {
              DebMes("ONVIF Device ".$devices[$i]['TITLE']." adding device to cycle.",'onvif');
-             $this->onvif_devices[$devices[$i]['ID']]->updated=0;
-             $this->onvif_devices[$devices[$i]['ID']]->polled=0;
-             $this->onvif_devices[$devices[$i]['ID']]->onvif=new Ponvif();
+             $this->onvif_devices[$devices[$i]['ID']]['updated']=0;
+             $this->onvif_devices[$devices[$i]['ID']]['polled']=0;
+             $this->onvif_devices[$devices[$i]['ID']]['onvif']=new Ponvif();
          }
 
 
-         if ((time()-$this->onvif_devices[$devices[$i]['ID']]->updated)>=$updateTimeout) {
+         if ((time()-$this->onvif_devices[$devices[$i]['ID']]['updated'])>=$updateTimeout) {
              DebMes("ONVIF Device ".$devices[$i]['TITLE']." updating subscription",'onvif');
-             $this->onvif_devices[$devices[$i]['ID']]->updated=time();
-             $this->updateDevice($devices[$i]['ID'], $this->onvif_devices[$devices[$i]['ID']]->onvif,1); // quick update
+             $this->onvif_devices[$devices[$i]['ID']]['updated']=time();
+             $this->updateDevice($devices[$i]['ID'], $this->onvif_devices[$devices[$i]['ID']]['onvif'],1); // quick update
              $devices[$i]=SQLSelectOne("SELECT * FROM onvif_devices WHERE ID=".$devices[$i]['ID']);
          }
-         if ($devices[$i]['SUBSCRIPTION_ADDRESS']!='') {
+         if ($devices[$i]['SUBSCRIPTION_ADDRESS']!='' && is_object($this->onvif_devices[$devices[$i]['ID']]['onvif'])) {
              if (!$devices[$i]['SUBSCRIPTION_TIMEOUT']) {
                  $devices[$i]['SUBSCRIPTION_TIMEOUT']=5; // default polling every 5 seconds
              }
-             if ((time()-$this->onvif_devices[$devices[$i]['ID']]->polled)>=$devices[$i]['SUBSCRIPTION_TIMEOUT']) {
+             if ((time()-$this->onvif_devices[$devices[$i]['ID']]['polled'])>=$devices[$i]['SUBSCRIPTION_TIMEOUT']) {
                  $subscription_address=$devices[$i]['SUBSCRIPTION_ADDRESS'];
                  //DebMes("ONVIF Device ".$devices[$i]['TITLE']." polling events (addr: ".$subscription_address.")",'onvif');
                  //DebMes($this->onvif_devices[$devices[$i]['ID']],'onvif');
-                 $this->onvif_devices[$devices[$i]['ID']]->polled=time();
-                 $response=$this->onvif_devices[$devices[$i]['ID']]->onvif->events_Pull($subscription_address);
+                 $this->onvif_devices[$devices[$i]['ID']]['polled']=time();
+                 $response=$this->onvif_devices[$devices[$i]['ID']]['onvif']->events_Pull($subscription_address);
                  if (is_array($response)) {
                      $url=BASE_URL.'/ajax/onvif.html';
                      $post = array('id' => $devices[$i]['ID'],'op' => 'event','response'   => json_encode($response));
