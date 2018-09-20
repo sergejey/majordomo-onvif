@@ -34,6 +34,21 @@
    [#TITLE#]
   </a></b>
  </td>
+ 
+ 
+  <td style="vertical-align:middle">
+	[#if ONLINE!=""#]
+		[#if ONLINE==1#]
+			<span class="label label-success" title="<#LANG_XIMI_APP_ONLINE#>">Online</span>
+		[#else#]
+			<span class="label label-warning" title="<#LANG_XIMI_APP_OFFLINE#>">Offline</span>
+		[#endif#]
+	[#else#]
+		&nbsp;
+	[#endif#]
+
+ </td>
+ 
  <td style="vertical-align:middle"
    >
   [#if IP!=""#]
@@ -42,8 +57,8 @@
    &nbsp;
   [#endif#]
  </td>
- <td style="vertical-align:middle"
-   >
+  
+ <td style="vertical-align:middle">
   [#if USERNAME!=""#]
    [#USERNAME#]
   [#else#]
