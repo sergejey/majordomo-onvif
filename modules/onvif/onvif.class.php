@@ -187,7 +187,7 @@ function run() {
          $onvif_object->setPassword('');
      }
 
-     if (preg_match('/http:.+\W/uis',$rec['XADDRS'],$m)) {
+     if (preg_match('/http:[\d\w\/\.\[\]:]+/uis',$rec['XADDRS'],$m)) {
          $link = $m[0];
          $link=preg_replace('/\[.+?\]/',$rec['IP'],$link);
          $onvif_object->setMediaUri($link);
@@ -270,6 +270,7 @@ function run() {
         }
         return 1;
     } else {
+        DebMes("Could not initialize device ".$rec['IP']. "(".$link.")",'onvif');
      return 0;
     }
   
@@ -470,7 +471,7 @@ function usual(&$out) {
 
 
          if ((time()-$this->onvif_devices[$devices[$i]['ID']]['updated'])>=$updateTimeout) {
-             //DebMes("ONVIF Device ".$devices[$i]['TITLE']." updating subscription",'onvif');
+             DebMes("ONVIF Device ".$devices[$i]['TITLE']." updating subscription",'onvif');
              $this->onvif_devices[$devices[$i]['ID']]['updated']=time();
              $this->updateDevice($devices[$i]['ID'], $this->onvif_devices[$devices[$i]['ID']]['onvif'],1); // quick update
              $devices[$i]=SQLSelectOne("SELECT * FROM onvif_devices WHERE ID=".$devices[$i]['ID']);
