@@ -466,12 +466,13 @@ function usual(&$out) {
              //DebMes("ONVIF Device ".$devices[$i]['TITLE']." adding device to cycle.",'onvif');
              $this->onvif_devices[$devices[$i]['ID']]['updated']=0;
              $this->onvif_devices[$devices[$i]['ID']]['polled']=0;
+             $this->onvif_devices[$devices[$i]['ID']]['events']=array();
              $this->onvif_devices[$devices[$i]['ID']]['onvif']=new Ponvif();
          }
 
 
          if ((time()-$this->onvif_devices[$devices[$i]['ID']]['updated'])>=$updateTimeout) {
-             DebMes("ONVIF Device ".$devices[$i]['TITLE']." updating subscription",'onvif');
+             //DebMes("ONVIF Device ".$devices[$i]['TITLE']." updating subscription",'onvif');
              $this->onvif_devices[$devices[$i]['ID']]['updated']=time();
              $this->updateDevice($devices[$i]['ID'], $this->onvif_devices[$devices[$i]['ID']]['onvif'],1); // quick update
              $devices[$i]=SQLSelectOne("SELECT * FROM onvif_devices WHERE ID=".$devices[$i]['ID']);
@@ -487,18 +488,28 @@ function usual(&$out) {
                  $this->onvif_devices[$devices[$i]['ID']]['polled']=time();
                  $response=$this->onvif_devices[$devices[$i]['ID']]['onvif']->events_Pull($subscription_address);
                  if (is_array($response)) {
-                     $url=BASE_URL.'/ajax/onvif.html';
-                     $post = array('id' => $devices[$i]['ID'],'op' => 'event','response'   => json_encode($response));
-                     $ch = curl_init();
-                     curl_setopt($ch, CURLOPT_URL, $url);
-                     curl_setopt($ch, CURLOPT_POST, 1);
-                     curl_setopt($ch, CURLOPT_POSTFIELDS, $post);
-                     curl_setopt($ch, CURLOPT_USERAGENT, 'User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.9; rv:32.0) Gecko/20100101 Firefox/32.0');
-                     curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-                     curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 15);
-                     curl_setopt($ch, CURLOPT_TIMEOUT, 15);
-                     $result = curl_exec($ch);
-                     curl_close($ch);
+
+                     $message_time=$response['NotificationMessage']['Message']['Message']['@attributes']['UtcTime'];
+                     $message_topic=$response['NotificationMessage']['Topic'].'/'.$response['NotificationMessage']['Message']['Message']['Data']['SimpleItem']['@attributes']['Name'];
+                     $message_value=$response['NotificationMessage']['Message']['Message']['Data']['SimpleItem']['@attributes']['Value'];
+                     $event_key=$message_time.'/'.$message_topic.'/'.$message_value;
+                     DebMes("Event key: $message_time/$message_topic/$message_value",'onvif');
+                     if (!in_array($event_key,$this->onvif_devices[$devices[$i]['ID']]['events'])) {
+                         array_push($this->onvif_devices[$devices[$i]['ID']]['events'],$event_key);
+                         $this->onvif_devices[$devices[$i]['ID']]['events']=array_slice($this->onvif_devices[$devices[$i]['ID']]['events'],0,100);
+                         $url=BASE_URL.'/ajax/onvif.html';
+                         $post = array('id' => $devices[$i]['ID'],'op' => 'event','response'   => json_encode($response));
+                         $ch = curl_init();
+                         curl_setopt($ch, CURLOPT_URL, $url);
+                         curl_setopt($ch, CURLOPT_POST, 1);
+                         curl_setopt($ch, CURLOPT_POSTFIELDS, $post);
+                         curl_setopt($ch, CURLOPT_USERAGENT, 'User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.9; rv:32.0) Gecko/20100101 Firefox/32.0');
+                         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+                         curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 15);
+                         curl_setopt($ch, CURLOPT_TIMEOUT, 15);
+                         $result = curl_exec($ch);
+                         curl_close($ch);
+                     }
 
                  }
                  //DebMes("ONVIF Device ".$devices[$i]['TITLE']." events poll response:\n".json_encode($response),'onvif');
