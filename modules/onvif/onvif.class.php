@@ -307,7 +307,10 @@ function processEventResponse($device_id,$data) {
         }
         $old_value=$command['VALUE'];
         $command['VALUE']=$item['VALUE'];
+
         $value=$command['VALUE'];
+
+	if ($value<>'0') {
         $command['UPDATED']=date('Y-m-d H:i:s');
         SQLUpdate('onvif_commands',$command);
         if ($command['LINKED_OBJECT'] && $command['LINKED_PROPERTY']) {
@@ -318,8 +321,12 @@ function processEventResponse($device_id,$data) {
         }
     }
 
+
+
+}
+
     //echo "Event reposne from $device_id:<br/>";
-    //print_r($data);
+///    print_r($data);
     //exit;
 }
 
