@@ -3,6 +3,32 @@
 <p>
 <a href="?view_mode=edit_onvif_devices" class="btn btn-default"><i class="glyphicon glyphicon-plus"></i> <#LANG_ADD#></a>
 <a href="?mode=discovery" class="btn btn-default"><i class="glyphicon glyphicon-search"></i> Discovery</a>
+
+<a class="btn btn-default" href="#" onClick="$('#api_settings').toggle();return false;"><#LANG_SETUP#></a>
+
+
+<div style="display:none" id='api_settings'>
+
+<form action="?" method="post" enctype="multipart/form-data" name="frmEdit" class="form-horizontal">
+<fieldset>
+<div class="form-group">
+	<label class="col-lg-3 control-label">DEBUG?&nbsp;&nbsp;
+ <input type="checkbox" name="debug" value="1"[#if DEBUG="1"#] checked[#endif#]> 
+</label>
+</div>
+<div class="form-actions">
+<button type="submit" name="subm" value="Submit" class="btn btn-primary"><#LANG_UPDATE#></button>
+<input type="hidden" name="view_mode" value="update_settings">
+<input type="hidden" name="mode" value="update">
+
+</div>
+</fieldset>
+</form>
+</div>
+
+
+
+
 </p>
 <table width=100% border=0><tr>
 <td valign=top>
@@ -59,11 +85,7 @@
  </td>
   
  <td style="vertical-align:middle">
-  [#if USERNAME!=""#]
-   [#USERNAME#]
-  [#else#]
-   &nbsp;
-  [#endif#]
+   [#UPDATED#]
  </td>
  <td style="vertical-align:middle"
    >
