@@ -259,7 +259,7 @@ function run() {
 
             $this->getConfig();
             if ($this->config['DEBUG']==1) 
-            DebMes("Update subscription response: ".$response ,'onvif');
+            DebMes("Update subscription response: ".json_encode($response),'onvif');
             if ($response['SubscriptionReference']['Address']) {
                 $rec['SUBSCRIPTION_ADDRESS']=$response['SubscriptionReference']['Address'];
                 SQLUpdate('onvif_devices',$rec);
@@ -292,20 +292,20 @@ function processEventResponse($device_id,$data) {
     if ($this->config['DEBUG']==1) 
     DebMes("Processing event response for $device_id : \n".json_encode($data),'onvif');
     $items=array();
-
     $item=array();
-    $item['TOPIC']=$data['NotificationMessage']['Topic'];
-    $item['FULL_DATA']=$data['NotificationMessage']['Message']['Message'];
-    $item['NAME']=$data['NotificationMessage']['Message']['Message']['Data']['SimpleItem']['@attributes']['Name'];
+    
+    $item['TOPIC']=$data['Topic'];
+    $item['FULL_DATA']=$data['Message']['Message'];
+    $item['NAME']=$data['Message']['Message']['Data']['SimpleItem']['@attributes']['Name'];
     $item['TITLE']=$item['TOPIC'].'/'.$item['NAME'];
-    $value=$data['NotificationMessage']['Message']['Message']['Data']['SimpleItem']['@attributes']['Value'];
+    $value=$data['Message']['Message']['Data']['SimpleItem']['@attributes']['Value'];
+   
     if ($value=='false') {
         $value=0;
     } elseif ($value=='true') {
         $value=1;
     }
     $item['VALUE']=$value;
-
     $items[]=$item;
 
     foreach($items as $item) {
@@ -317,15 +317,14 @@ function processEventResponse($device_id,$data) {
         }
         $old_value=$command['VALUE'];
         $command['VALUE']=$item['VALUE'];
-
         $value=$command['VALUE'];
-   sg('test.vm',$value);
-	if ($value=="1") {
+        
+	
+	if ($value!=$old_value) {
         $command['UPDATED']=date('Y-m-d H:i:s');
         SQLUpdate('onvif_commands',$command);
         $sql="update onvif_devices set UPDATED='".date('Y-m-d H:i:s')."' where ID=".$rec['ID'];
-        sg('test.onvsql', $sql);
-	SQLExec($sql);
+				SQLExec($sql);
         if ($command['LINKED_OBJECT'] && $command['LINKED_PROPERTY']) {
             setGlobal($command['LINKED_OBJECT'].'.'.$command['LINKED_PROPERTY'], $value, array($this->name=>'0'));
         }
@@ -533,18 +532,25 @@ function usual(&$out) {
                  if ($this->config['DEBUG']==1) {
                  DebMes("ONVIF Device ".$devices[$i]['TITLE']." polling events (addr: ".$subscription_address.")",'onvif');
                  DebMes($this->onvif_devices[$devices[$i]['ID']],'onvif');
-                                                }
+                                              }
 
                  $this->onvif_devices[$devices[$i]['ID']]['polled']=time();
                  $response=$this->onvif_devices[$devices[$i]['ID']]['onvif']->events_Pull($subscription_address);
                  if (is_array($response)) {
-
-                     $message_time=$response['NotificationMessage']['Message']['Message']['@attributes']['UtcTime'];
-                     $message_topic=$response['NotificationMessage']['Topic'].'/'.$response['NotificationMessage']['Message']['Message']['Data']['SimpleItem']['@attributes']['Name'];
-                     $message_value=$response['NotificationMessage']['Message']['Message']['Data']['SimpleItem']['@attributes']['Value'];
+                 	
+                 if(isset($response['NotificationMessage'][0]))
+                    	$responses=$response['NotificationMessage'];
+                    	else
+                    	$responses[]=$response['NotificationMessage'];
+                    	
+                 foreach ($responses as $response)
+                 {
+                     $message_time=$response['Message']['Message']['@attributes']['UtcTime'];
+                     $message_topic=$response['Topic'].'/'.$response['Message']['Message']['Data']['SimpleItem']['@attributes']['Name'];
+                     $message_value=$response['Message']['Message']['Data']['SimpleItem']['@attributes']['Value'];
                      $event_key=$message_time.'/'.$message_topic.'/'.$message_value;
-                     if ($this->config['DEBUG']==1) 
-                     DebMes("Event key: $message_time/$message_topic/$message_value",'onvif');
+                     if ($this->config['DEBUG']==1)
+                     DebMes ("Event key: $message_time/$message_topic/$message_value",'onvif');
                      if (!in_array($event_key,$this->onvif_devices[$devices[$i]['ID']]['events'])) {
                          array_push($this->onvif_devices[$devices[$i]['ID']]['events'],$event_key);
                          $this->onvif_devices[$devices[$i]['ID']]['events']=array_slice($this->onvif_devices[$devices[$i]['ID']]['events'],0,100);
@@ -561,11 +567,12 @@ function usual(&$out) {
                          $result = curl_exec($ch);
                          curl_close($ch);
                      }
+                    }
 
                  }
                  $this->getConfig();
-                 if ($this->config['DEBUG']==1) 
-                 DebMes("ONVIF Device ".$devices[$i]['TITLE']." events poll response:\n".json_encode($response),'onvif');
+                 //if ($this->config['DEBUG']==1) 
+                 //DebMes("ONVIF Device ".$devices[$i]['TITLE']." events poll response:\n".json_encode($response),'onvif');
              }
          }
      }
